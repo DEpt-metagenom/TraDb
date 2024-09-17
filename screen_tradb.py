@@ -132,8 +132,8 @@ def run_blastp(amino_acids_db, tra_db_dir, tra_amino_acids, tra_amino_data, base
 
     if not os.path.exists(tra_db_dir):
         os.makedirs(tra_db_dir)
-        wget_fa_cmd = f'wget https://github.com/DEpt-metagenom/TraDb/tra_db/Tra_db_sequences_aa.fa.gz -O {tra_amino_acids}.gz && gunzip {tra_amino_acids}.gz'
-        wget_tsv_cmd = f'wget https://github.com/DEpt-metagenom/TraDb/tra_db/Tra_db_taxa_positons_aa.tsv.gz -O {tra_amino_data}.gz && gunzip {tra_amino_acids}.gz'
+        wget_fa_cmd = f'wget https://github.com/DEpt-metagenom/TraDb/raw/main/tra_db/Tra_db_sequences_aa.fa.gz -O {tra_amino_acids}.gz && gunzip {tra_amino_acids}.gz'
+        wget_tsv_cmd = f'wget https://github.com/DEpt-metagenom/TraDb/raw/main/tra_db/Tra_db_taxa_positons_aa.tsv.gz -O {tra_amino_data}.gz && gunzip {tra_amino_acids}.gz'
         os.system(wget_fa_cmd)
         os.system(wget_tsv_cmd)
 
@@ -178,8 +178,8 @@ def run_blastn(dna_db, tra_db_dir, tra_dna, tra_dna_data, basename, outdir, num_
 
     if not os.path.exists(tra_db_dir):
         os.makedirs(tra_db_dir)
-        wget_fa_cmd = f'wget https://github.com/DEpt-metagenom/TraDb/tra_db/Tra_db_sequences_dna.fa.gz -O {tra_dna}.gz && gunzip {tra_dna}.gz'
-        wget_tsv_cmd = f'wget https://github.com/DEpt-metagenom/TraDb/tra_db/Tra_db_taxa_positons_dna.tsv.gz -O {tra_dna_data}.gz && gunzip {tra_dna}.gz'
+        wget_fa_cmd = f'wget https://github.com/DEpt-metagenom/TraDb/raw/main/tra_db/Tra_db_sequences_dna.fa.gz -O {tra_dna}.gz && gunzip {tra_dna}.gz'
+        wget_tsv_cmd = f'wget https://github.com/DEpt-metagenom/TraDb/raw/main/tra_db/Tra_db_taxa_positons_dna.tsv.gz -O {tra_dna_data}.gz && gunzip {tra_dna}.gz'
         os.system(wget_fa_cmd)
         os.system(wget_tsv_cmd)
 
