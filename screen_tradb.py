@@ -7,7 +7,7 @@ import re
 import sys
 import sqlite3
 
-version_number = str("screen_tradb version 0.1")
+version_number = str("screen_tradb version 0.2")
 
 home_dir = os.path.expanduser('~')
 
@@ -81,9 +81,13 @@ def get_metadata(filtered_hits, sqlite_db, hit_data):
 
     hits = pd.read_csv(filtered_hits, sep='\t')
 
+    clusters = hits['cluster'].unique()
+
+    clusters_placeholder = ','.join([f"'{cluster}'" for cluster in clusters])
+
     conn = sqlite3.connect(sqlite_db)
 
-    query = "SELECT cluster, taxa, position FROM data"
+    query = f"SELECT cluster, taxa, position FROM data WHERE cluster IN ({clusters_placeholder})"
     metadata = pd.read_sql_query(query, conn)
 
     conn.close()
@@ -95,7 +99,7 @@ def get_metadata(filtered_hits, sqlite_db, hit_data):
 
     merged_data.to_csv(hit_data, sep="\t", index=False)
 
-    print(f'Hits with reference data saved to: {hit_data}')
+    print("Metadata saved to:", hit_data)
 
 def filter_fasta(orf_fasta, hit_data, out_fasta):
     """function to subset ORFs in fasta format with Tra hits"""
