@@ -5,6 +5,7 @@ import pandas as pd
 import os
 import re
 import sys
+import sqlite3
 
 version_number = str("screen_tradb version 0.1")
 
@@ -72,20 +73,29 @@ def filter_hits(raw_hits, filtered_hits):
     filtered.to_csv(filtered_hits, sep='\t', index=False)
 
 # TODO frequency of reference taxa / gene
-def get_metadata(filtered_hits, tra_amino_data, hit_data):
-    """function to get metadata of hits, i.e. taxa the hit can be associated with and the position of reference genes(contig:start-end) using 0-based coordinates"""
+def get_metadata(filtered_hits, sqlite_db, hit_data):
+    """
+    Function to get metadata of hits from a SQLite database.
+    Adds 'taxa' and 'position' to the hits by matching the 'cluster'.
+    """
 
     hits = pd.read_csv(filtered_hits, sep='\t')
-    metadata_columns = ['cluster', 'taxa', 'position']
-    metadata = pd.read_csv(tra_amino_data, sep='\t', names=metadata_columns)
 
-    # for testing only
-    # matching_values = metadata['cluster'].isin(hits['cluster'])
-    # result = metadata[matching_values]
-    # print(result)
+    conn = sqlite3.connect(sqlite_db)
 
-    merged_data = pd.merge(hits, metadata, on='cluster')
+    query = "SELECT cluster, taxa, position FROM data"
+    metadata = pd.read_sql_query(query, conn)
+
+    conn.close()
+
+    metadata['taxa'] = metadata['taxa'].str.replace(r"[\[\]']", '', regex=True)
+    metadata['position'] = metadata['position'].str.replace(r"[\[\]']", '', regex=True)
+
+    merged_data = pd.merge(hits, metadata, on='cluster', how='left')
+
     merged_data.to_csv(hit_data, sep="\t", index=False)
+
+    print(f'Hits with reference data saved to: {hit_data}')
 
 def filter_fasta(orf_fasta, hit_data, out_fasta):
     """function to subset ORFs in fasta format with Tra hits"""
@@ -133,7 +143,7 @@ def run_blastp(amino_acids_db, tra_db_dir, tra_amino_acids, tra_amino_data, base
     if not os.path.exists(tra_db_dir):
         os.makedirs(tra_db_dir)
         wget_fa_cmd = f'wget https://github.com/DEpt-metagenom/TraDb/raw/main/tra_db/Tra_db_sequences_aa.fa.gz -O {tra_amino_acids}.gz && gunzip {tra_amino_acids}.gz'
-        wget_tsv_cmd = f'wget https://github.com/DEpt-metagenom/TraDb/raw/main/tra_db/Tra_db_taxa_positons_aa.tsv.gz -O {tra_amino_data}.gz && gunzip {tra_amino_acids}.gz'
+        wget_tsv_cmd = f'wget https://github.com/DEpt-metagenom/TraDb/raw/main/tra_db/Tra_db_taxa_positons_aa.db -O {tra_amino_data}.gz && gunzip {tra_amino_acids}.gz'
         os.system(wget_fa_cmd)
         os.system(wget_tsv_cmd)
 
@@ -179,7 +189,7 @@ def run_blastn(dna_db, tra_db_dir, tra_dna, tra_dna_data, basename, outdir, num_
     if not os.path.exists(tra_db_dir):
         os.makedirs(tra_db_dir)
         wget_fa_cmd = f'wget https://github.com/DEpt-metagenom/TraDb/raw/main/tra_db/Tra_db_sequences_dna.fa.gz -O {tra_dna}.gz && gunzip {tra_dna}.gz'
-        wget_tsv_cmd = f'wget https://github.com/DEpt-metagenom/TraDb/raw/main/tra_db/Tra_db_taxa_positons_dna.tsv.gz -O {tra_dna_data}.gz && gunzip {tra_dna}.gz'
+        wget_tsv_cmd = f'wget https://github.com/DEpt-metagenom/TraDb/raw/main/tra_db/Tra_db_taxa_positons_dna.db -O {tra_dna_data}.gz && gunzip {tra_dna}.gz'
         os.system(wget_fa_cmd)
         os.system(wget_tsv_cmd)
 
@@ -253,13 +263,13 @@ def main():
     tra_db_dir = args.transfer_gene_db_dir
     amino_acids_db = f'{outdir}/{basename}_aa_db'
     tra_amino_acids = f'{tra_db_dir}/Tra_db_sequences_aa.fa'
-    tra_amino_data = f'{tra_db_dir}/Tra_db_taxa_positons_aa.tsv'
+    tra_amino_data = f'{tra_db_dir}/Tra_db_taxa_positons_aa.db'
     mai = args.min_aa_identity
     mac = args.min_aa_coverage
     mae = args.min_aa_evalue
     dna_db = f'{outdir}/{basename}_dna_db'
     tra_dna = f'{tra_db_dir}/Tra_db_sequences_dna.fa'
-    tra_dna_data = f'{tra_db_dir}/Tra_db_taxa_positons_dna.tsv'
+    tra_dna_data = f'{tra_db_dir}/Tra_db_taxa_positons_dna.db'
     mdi = args.min_dna_identity
     mdc = args.min_dna_coverage
     mde = args.min_dna_evalue
