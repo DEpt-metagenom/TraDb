@@ -459,10 +459,10 @@ def main():
     parser.add_argument("--platon_db_dir", "-pdb", default=f"{home_dir}/platon_db", help="Where the reference database of platon can be found. Default is $HOME/platon_db. If it cannot be found, automatic install will be attempted.")
     parser.add_argument("--transfer_gene_db_dir", "-tdb", default=f"{home_dir}/tra_db", help="Where the reference conjugational transfer gene database can be found. Default is $HOME/tra_db. If it cannot be found, automatic install will be attempted.")
     parser.add_argument("--min_aa_identity", "-mai", default='80', help="Minimum percent of identity when screening amino acids (0-100). Default is 80.")
-    parser.add_argument("--min_aa_coverage", "-mac", default='0.8', help="Minimum percent of coverage when screening amino acids (0-100). Default is 80.")
+    parser.add_argument("--min_aa_coverage", "-mac", default='0.8', help="Minimum percent of coverage when screening amino acids (0-1). Default is 0.8.")
     parser.add_argument("--min_aa_evalue", "-mae", default='1e-50', help="Minimum e-value when screening amino acids. Default is 1e-50.")
     parser.add_argument("--min_dna_identity", "-mdi", default='80', help="Minimum percent of identity when screening DNA sequences (0-100). Default is 80.")
-    parser.add_argument("--min_dna_coverage", "-mdc", default='0.8', help="Minimum percent of coverage when screening DNA sequences (0-100). Default is 80.")
+    parser.add_argument("--min_dna_coverage", "-mdc", default='0.8', help="Minimum percent of coverage when screening DNA sequences (0-1). Default is 0.8.")
     parser.add_argument("--min_dna_evalue", "-mde", default='1e-50', help="Minimum e-value when screening DNA sequences. Default is 1e-50.")
     parser.add_argument("--version", "-V", action='version', version=version_number, help="Print version number and exit")
     args = parser.parse_args()
@@ -533,22 +533,28 @@ def main():
                 print("Input file most probably contains amino acid sequences.")
                 run_shell_cmd(f'cp {infile} {outdir}/{basename}_aa.fa')
                 run_mmseqs(amino_acids_db, tra_db_dir, tra_amino_acids, tra_amino_data, basename, outdir, num_proc, mai, mac, mae, "aa")
-        else:
-            if run_type == "dna":
-                if not check_fasta_type(infile):
-                    print("Input file does not seem to contain DNA sequences. Please check the input and try again.")
-                    exit()
+        elif run_type == "dna":
+            if not check_fasta_type(infile):
+                print("Input file does not seem to contain DNA sequences. Please check the input and try again.")
+                exit()
+            run_shell_cmd(f'cp {infile} {outdir}/{basename}_dna.fa')
+            run_mmseqs(dna_db, tra_db_dir, tra_dna, tra_dna_data, basename, outdir, num_proc, mdi, mdc, mde, "dna")
+        elif run_type == "aa":
+            if check_fasta_type(infile):
+                print("Input file does not seem to contain amino acid sequences. Please check the input and try again.")
+                exit()
+            run_shell_cmd(f'cp {infile} {outdir}/{basename}_aa.fa')
+            run_mmseqs(amino_acids_db, tra_db_dir, tra_amino_acids, tra_amino_data, basename, outdir, num_proc, mai, mac, mae, "aa")
+        elif run_type not in ["dna", "aa", "auto"]:
+            print("Input type set incorrectly (probably -t both). Attempting to determine the input type automatically.")
+            if check_fasta_type(infile):
+                print("Input file most probably contains DNA sequences.")
                 run_shell_cmd(f'cp {infile} {outdir}/{basename}_dna.fa')
                 run_mmseqs(dna_db, tra_db_dir, tra_dna, tra_dna_data, basename, outdir, num_proc, mdi, mdc, mde, "dna")
-            if run_type == "aa":
-                if check_fasta_type(infile):
-                    print("Input file does not seem to contain amino acid sequences. Please check the input and try again.")
-                    exit()
+            else:
+                print("Input file most probably contains amino acid sequences.")
                 run_shell_cmd(f'cp {infile} {outdir}/{basename}_aa.fa')
                 run_mmseqs(amino_acids_db, tra_db_dir, tra_amino_acids, tra_amino_data, basename, outdir, num_proc, mai, mac, mae, "aa")
-            else:
-                if run_type not in ["dna", "aa"]:
-                    print("Please specify the type of search to be run. Choices of --type (-t) are 'dna', 'aa' if screen_tradb.py is run with ORFs as input setting this is mandatory. \nRunning -t auto could be attempted to determine the input type automatically.")
     elif not input_orf and plasmid_predict:
         run_platon(infile, outdir, basename, num_proc, platon_db_dir)
         prodigal_infile = f'{outdir}/{basename}_platon/{basename}.plasmid.fasta'
