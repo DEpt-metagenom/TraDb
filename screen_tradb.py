@@ -394,21 +394,21 @@ def parse_fasta(fasta_file):
 
 def is_fasta_dna(fasta_file):
     """
-    Determine whether the sequences in the FASTA file are DNA or Protein.
+    Determine whether all sequences in the FASTA file are DNA.
 
     Args:
         fasta_file (str): Path to the FASTA file to be checked.
 
     Returns:
-        bool: True if the sequences are DNA, False if they are Protein.
+        bool: True if all sequences are DNA, False if any sequence is not DNA.
     """
     sequences = parse_fasta(fasta_file)
 
     for header, sequence in sequences:
-        if is_dna_sequence(sequence):
-            return True
-        else:
+        if not is_dna_sequence(sequence):
             return False
+
+    return True
 
 
 def main():
