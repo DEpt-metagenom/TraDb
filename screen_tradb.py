@@ -392,7 +392,7 @@ def parse_fasta(fasta_file):
     return sequences
 
 
-def check_fasta_type(fasta_file):
+def is_fasta_dna(fasta_file):
     """
     Determine whether the sequences in the FASTA file are DNA or Protein.
 
@@ -525,7 +525,7 @@ def main():
             run_mmseqs(amino_acids_db, tra_db_dir, tra_amino_acids, tra_amino_data, basename, outdir, num_proc, mai, mac, mae, "aa")
     elif input_orf and not plasmid_predict:
         if run_type == "auto":
-            if check_fasta_type(infile):
+            if is_fasta_dna(infile):
                 print("Input file most probably contains DNA sequences.")
                 run_shell_cmd(f'cp {infile} {outdir}/{basename}_dna.fa')
                 run_mmseqs(dna_db, tra_db_dir, tra_dna, tra_dna_data, basename, outdir, num_proc, mdi, mdc, mde, "dna")
@@ -534,20 +534,20 @@ def main():
                 run_shell_cmd(f'cp {infile} {outdir}/{basename}_aa.fa')
                 run_mmseqs(amino_acids_db, tra_db_dir, tra_amino_acids, tra_amino_data, basename, outdir, num_proc, mai, mac, mae, "aa")
         elif run_type == "dna":
-            if not check_fasta_type(infile):
+            if not is_fasta_dna(infile):
                 print("Input file does not seem to contain DNA sequences. Please check the input and try again.")
                 exit()
             run_shell_cmd(f'cp {infile} {outdir}/{basename}_dna.fa')
             run_mmseqs(dna_db, tra_db_dir, tra_dna, tra_dna_data, basename, outdir, num_proc, mdi, mdc, mde, "dna")
         elif run_type == "aa":
-            if check_fasta_type(infile):
+            if is_fasta_dna(infile):
                 print("Input file does not seem to contain amino acid sequences. Please check the input and try again.")
                 exit()
             run_shell_cmd(f'cp {infile} {outdir}/{basename}_aa.fa')
             run_mmseqs(amino_acids_db, tra_db_dir, tra_amino_acids, tra_amino_data, basename, outdir, num_proc, mai, mac, mae, "aa")
         elif run_type not in ["dna", "aa", "auto"]:
-            print("Input type set incorrectly (probably -t both). Attempting to determine the input type automatically.")
-            if check_fasta_type(infile):
+            print("Input type set incorrectly (probably --type both, which is the default setting). Attempting to determine the input type automatically.")
+            if is_fasta_dna(infile):
                 print("Input file most probably contains DNA sequences.")
                 run_shell_cmd(f'cp {infile} {outdir}/{basename}_dna.fa')
                 run_mmseqs(dna_db, tra_db_dir, tra_dna, tra_dna_data, basename, outdir, num_proc, mdi, mdc, mde, "dna")
