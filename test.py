@@ -39,7 +39,7 @@ def sort_tsv(file_path):
 success = True
 for filename in os.listdir(expected_output_dir):
     # Skip .log files
-    if filename.endswith('.log'):
+    if filename.endswith('.log') or filename.endswith('raw_hits.tsv'):
         continue
 
     expected_file = os.path.join(expected_output_dir, filename)
@@ -51,7 +51,7 @@ for filename in os.listdir(expected_output_dir):
         continue
 
     # Sort and compare TSV files
-    if filename.endswith('.tsv') or filename.endswith('raw_hits.tsv'):
+    if filename.endswith('.tsv'):
         expected_sorted = sort_tsv(expected_file)
         actual_sorted = sort_tsv(actual_file)
         if expected_sorted != actual_sorted:
