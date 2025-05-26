@@ -6,8 +6,17 @@ import os
 import difflib
 
 # Command to run
-command = f'./screen_tradb.py -np 4 test/AP001918.1.fasta -t both'
-# Print the current working directory
+# Loop through all .fasta files in the ./test/ directory
+fasta_files = [f for f in os.listdir('./test/') if f.endswith('.fasta')]
+for fasta_file in fasta_files:
+    command = f'./screen_tradb.py -np 4 ./test/{fasta_file} -t both'
+    print(f"Running command: {command}")
+    # Run the command
+    try:
+        subprocess.run(command, check=True, shell=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error running command for {fasta_file}: {e}")
+        exit(1)
 print(f"Current working directory: {os.getcwd()}")
 # List the contents of the current working directory
 print("Contents of the working directory:")
