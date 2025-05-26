@@ -325,7 +325,10 @@ def run_mmseqs(seq_db, tra_db_dir, seqs, metadata, basename, outdir, num_proc, i
         run_shell_cmd(create_mmseqs_db_cmd)
         download_and_extract(f'https://github.com/DEpt-metagenom/TraDb/raw/main/tra_db/Tra_db_taxa_positons_{seq_type}.db', tra_db_dir, metadata, arch_type=None)
 
-    mmseqs_cmd = f'mmseqs easy-search --threads {num_proc} --format-mode 4 --format-output "target,query,pident,nident,qcov,evalue,gapopen,tlen,qlen,bits" --cov-mode 2 -c 0.8 --min-seq-id 0.8 -e 1e-50 {orf_fasta} {seq_db} {raw_hits} tmp 1> {outdir}/{basename}_{seq_type}_mmseqs.log'
+    if seq_type == 'dna':
+        mmseqs_cmd = f'mmseqs easy-search --search-type 3 --threads {num_proc} --format-mode 4 --format-output "target,query,pident,nident,qcov,evalue,gapopen,tlen,qlen,bits" --cov-mode 2 -c 0.8 --min-seq-id 0.8 -e 1e-50 {orf_fasta} {seq_db} {raw_hits} tmp 1> {outdir}/{basename}_{seq_type}_mmseqs.log'
+    else:
+        mmseqs_cmd = f'mmseqs easy-search --threads {num_proc} --format-mode 4 --format-output "target,query,pident,nident,qcov,evalue,gapopen,tlen,qlen,bits" --cov-mode 2 -c 0.8 --min-seq-id 0.8 -e 1e-50 {orf_fasta} {seq_db} {raw_hits} tmp 1> {outdir}/{basename}_{seq_type}_mmseqs.log'
     run_shell_cmd(mmseqs_cmd)
 
     with open(raw_hits, 'r') as fp:
