@@ -57,7 +57,7 @@ def download_and_extract(url, output_dir, output_file, arch_type='tar'):
     if arch_type == 'tar':
         arch_cmd = f'mkdir -p {output_dir} && tar -xzf {output_file} -C {output_dir}'
     elif arch_type == 'gz':
-        arch_cmd = f'mkdir -p {output_dir} && gunzip {output_file}'
+        arch_cmd = f'mkdir -p {output_dir} && gunzip -f {output_file}'
     elif arch_type is None:
         arch_cmd = f'echo "metadata database downloaded"'
     run_shell_cmd(wget_cmd)
