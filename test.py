@@ -1,8 +1,46 @@
+#!/usr/bin/env python
+
+import subprocess
+import filecmp
+import os
+import difflib
+
+# Command to run
+command = f'./screen_tradb.py -np 4 test/AP001918.1.fasta -t both'
+# Print the current working directory
+print(f"Current working directory: {os.getcwd()}")
+# List the contents of the current working directory
+print("Contents of the working directory:")
+for item in os.listdir(os.getcwd()):
+    print(f" - {item}")
+# Run the command
+try:
+    subprocess.run(command, check=True, shell=True)
+except subprocess.CalledProcessError as e:
+    print(f"Error running command: {e}")
+    exit(1)
+
+# Directory containing expected output
+expected_output_dir = 'test/test_out'
+
+# Directory containing actual output (assuming it is generated in the current directory)
+actual_output_dir = './tra_out'
+
+# Function to sort a TSV file by the first column
+def sort_tsv(file_path):
+    with open(file_path, 'r') as f:
+        lines = f.readlines()
+    header = lines[0] if lines and '\t' in lines[0] else None
+    data_lines = lines[1:] if header else lines
+    sorted_lines = sorted(data_lines, key=lambda x: x.split('\t')[0])
+    return [header] + sorted_lines if header else sorted_lines
+
 # Compare files
 success = True
 for filename in os.listdir(expected_output_dir):
+    # Skip .log files
     if filename.endswith('.log'):
-        continue  # Skip .log files
+        continue
 
     expected_file = os.path.join(expected_output_dir, filename)
     actual_file = os.path.join(actual_output_dir, filename)
