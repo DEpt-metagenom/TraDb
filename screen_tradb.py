@@ -52,12 +52,13 @@ def download_and_extract(url, output_dir, output_file, arch_type='tar'):
         - The downloaded file is saved to the specified output directory.
         - The file is extracted into the output directory if it is an archive.
     """
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
     wget_cmd = f'wget {url} -O {output_file}'
     if arch_type == 'tar':
         arch_cmd = f'mkdir -p {output_dir} && tar -xzf {output_file} -C {output_dir}'
     elif arch_type == 'gz':
         arch_cmd = f'mkdir -p {output_dir} && gunzip {output_file}'
-    elif arch_type == None:
+    elif arch_type is None:
         arch_cmd = f'echo "metadata database downloaded"'
     run_shell_cmd(wget_cmd)
     run_shell_cmd(arch_cmd)
@@ -414,36 +415,81 @@ def is_fasta_dna(fasta_file):
     return True
 
 
+def download_all_databases(tra_db_dir, platon_db_dir):
+    """
+    Download all required databases for the script.
+
+    Args:
+        tra_db_dir (str): Directory where the TraDb database will be stored.
+        platon_db_dir (str): Directory where the Platon database will be stored.
+
+    Returns:
+        None
+    """
+    print("Downloading all required databases...")
+
+    # Download TraDb DNA database
+    download_and_extract(
+        'https://github.com/DEpt-metagenom/TraDb/raw/main/tra_db/Tra_db_sequences_dna.fa.gz',
+        tra_db_dir,
+        f'{tra_db_dir}/Tra_db_sequences_dna.fa.gz',
+        arch_type='gz'
+    )
+
+    # Download TraDb AA database
+    download_and_extract(
+        'https://github.com/DEpt-metagenom/TraDb/raw/main/tra_db/Tra_db_sequences_aa.fa.gz',
+        tra_db_dir,
+        f'{tra_db_dir}/Tra_db_sequences_aa.fa.gz',
+        arch_type='gz'
+    )
+
+    # Download TraDb metadata for DNA
+    download_and_extract(
+        'https://github.com/DEpt-metagenom/TraDb/raw/main/tra_db/Tra_db_taxa_positons_dna.db',
+        tra_db_dir,
+        f'{tra_db_dir}/Tra_db_taxa_positons_dna.db',
+        arch_type=None
+    )
+
+    # Download TraDb metadata for AA
+    download_and_extract(
+        'https://github.com/DEpt-metagenom/TraDb/raw/main/tra_db/Tra_db_taxa_positons_aa.db',
+        tra_db_dir,
+        f'{tra_db_dir}/Tra_db_taxa_positons_aa.db',
+        arch_type=None
+    )
+
+    # Download Platon database
+    download_and_extract(
+        'https://zenodo.org/record/4066768/files/db.tar.gz',
+        platon_db_dir,
+        f'{platon_db_dir}/db.tar.gz',
+        arch_type='tar'
+    )
+
+    print("All databases have been downloaded successfully.")
+
+
+def check_dependencies():
+    """
+    Check if all required dependencies are available in the system.
+
+    Returns:
+        bool: True if all dependencies are available, False otherwise.
+    """
+    dependencies = ['prodigal', 'bedtools', 'platon', 'wget', 'mmseqs']
+    for dep in dependencies:
+        if subprocess.run(f'which {dep}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).returncode != 0:
+            print(f'{dep} is not available. Please install it before running the script.')
+            return False
+    return True
+
+
 def main():
     """
     Main function that parses command-line arguments and runs the pipeline for screening conjugation transfer genes in plasmid sequences.
-
-    The function performs the following steps:
-    1. Parses command-line arguments.
-    2. Checks for required dependencies.
-    3. Creates the output directory if it does not exist.
-    4. Runs the appropriate pipeline based on the input arguments.
-
-    Command-line Arguments:
-    - input_fasta (str): Input fasta file. Mandatory input.
-    - --type, -t (str): Type of search to be run. Choices are 'dna', 'aa', 'both'. Default is 'both'.
-    - --reading_frames, -ORF (bool): If the input consists of ORFs. Default is False.
-    - --plasmid_prediction, -p (bool): If plasmid prediction of the input should be attempted. Default is False.
-    - --number_of_processors, -np (int): Number of processes invoked for the search. Default is 1.
-    - --output_directory, -o (str): Output directory to store results. Default is "tra_out".
-    - --platon_db_dir, -pdb (str): Directory where the reference database of platon can be found. Default is $HOME/platon_db.
-    - --transfer_gene_db_dir, -tdb (str): Directory where the reference conjugational transfer gene database can be found. Default is $HOME/tra_db.
-    - --min_aa_identity, -mai (str): Minimum percent of identity when screening amino acids. Default is 80.
-    - --min_aa_coverage, -mac (str): Minimum percent of coverage when screening amino acids. Default is 0.8.
-    - --min_aa_evalue, -mae (str): Minimum e-value when screening amino acids. Default is 1e-50.
-    - --min_dna_identity, -mdi (str): Minimum percent of identity when screening DNA sequences. Default is 80.
-    - --min_dna_coverage, -mdc (str): Minimum percent of coverage when screening DNA sequences. Default is 0.8.
-    - --min_dna_evalue, -mde (str): Minimum e-value when screening DNA sequences. Default is 1e-50.
-    - --version, -V: Print version number and exit.
-
-    The function also includes basic logging to print the status of the run and checks for the availability of required dependencies.
     """
-
     print("""
                                           _____          ____  _
            ___  ___ _ __ ___  ___ _ __   |_   _| __ __ _|  _ \| |__
@@ -453,7 +499,8 @@ def main():
     """)
 
     parser = argparse.ArgumentParser(description="Screening of conjugation transfer genes in plasmid sequences.")
-    parser.add_argument("input_fasta", help="Input fasta file. Mandatory input.")
+    parser.add_argument("input_fasta", nargs='?', help="Input fasta file. Mandatory input unless --download-database is used.")
+    parser.add_argument("--download-database", "-dd", action='store_true', help="Download all required databases and exit.")
     parser.add_argument("--type", "-t", default='both', choices=['dna', 'aa', 'both', 'auto'], help="Type of search to be run. Choices are 'dna', 'aa', 'both' and 'auto'. Default is 'both'. Auto works only if the input are ORFs (-ORF or --reading-frames).")
     parser.add_argument("--reading_frames", "-ORF", default=False, action='store_true', help="If the input consists of ORFs. Use this only if you already predicted the ORFs of the input. If set, you should also consider changing --type appropriately. Default is False.")
     parser.add_argument("--plasmid_prediction", "-p", default=False, action='store_true', help="If plasmid prediction of the input should be attempted. The output of platon containing the plasmids will be screened for transfer genes")
@@ -470,7 +517,16 @@ def main():
     parser.add_argument("--version", "-V", action='version', version=version_number, help="Print version number and exit")
     args = parser.parse_args()
 
+    if args.download_database:
+        download_all_databases(args.transfer_gene_db_dir, args.platon_db_dir)
+        print("Databases downloaded successfully. Exiting.")
+        exit(0)
+
     infile = args.input_fasta
+    if not infile:
+        print("Error: Input fasta file is required unless --download-database is used.")
+        exit(1)
+
     run_type = args.type
     basename = os.path.splitext(os.path.basename(infile))[0]
     outdir = args.output_directory
@@ -491,6 +547,8 @@ def main():
     mdi = args.min_dna_identity
     mdc = args.min_dna_coverage
     mde = args.min_dna_evalue
+
+    check_dependencies()
 
     if not os.path.exists(infile):
         print(f"Input file {infile} not found. Please check the path and try again.")
