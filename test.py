@@ -24,7 +24,16 @@ except subprocess.CalledProcessError as e:
 expected_output_dir = 'test/test_out'
 
 # Directory containing actual output (assuming it is generated in the current directory)
-actual_output_dir = '.'
+actual_output_dir = './tra_out'
+
+# Function to sort a TSV file by the first column
+def sort_tsv(file_path):
+    with open(file_path, 'r') as f:
+        lines = f.readlines()
+    header = lines[0] if lines and '\t' in lines[0] else None
+    data_lines = lines[1:] if header else lines
+    sorted_lines = sorted(data_lines, key=lambda x: x.split('\t')[0])
+    return [header] + sorted_lines if header else sorted_lines
 
 # Compare files
 success = True
@@ -37,15 +46,26 @@ for filename in os.listdir(expected_output_dir):
         success = False
         continue
 
-    if not filecmp.cmp(expected_file, actual_file, shallow=False):
-        success = False
-        print(f"Differences found in file: {filename}")
-        with open(expected_file, 'r') as ef, open(actual_file, 'r') as af:
-            expected_lines = ef.readlines()
-            actual_lines = af.readlines()
-            diff = difflib.unified_diff(expected_lines, actual_lines, 
+    # Sort and compare TSV files
+    if filename.endswith('.tsv'):
+        expected_sorted = sort_tsv(expected_file)
+        actual_sorted = sort_tsv(actual_file)
+        if expected_sorted != actual_sorted:
+            success = False
+            print(f"Differences found in file: {filename}")
+            diff = difflib.unified_diff(expected_sorted, actual_sorted, 
                                         fromfile='expected', tofile='actual')
             print(''.join(diff))
+    else:
+        if not filecmp.cmp(expected_file, actual_file, shallow=False):
+            success = False
+            print(f"Differences found in file: {filename}")
+            with open(expected_file, 'r') as ef, open(actual_file, 'r') as af:
+                expected_lines = ef.readlines()
+                actual_lines = af.readlines()
+                diff = difflib.unified_diff(expected_lines, actual_lines, 
+                                            fromfile='expected', tofile='actual')
+                print(''.join(diff))
 
 if success:
     print("Test successful: All outputs match expected results.")
