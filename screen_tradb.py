@@ -318,13 +318,13 @@ def run_mmseqs(seq_db, tra_db_dir, seqs, metadata, basename, outdir, num_proc, i
     if not os.path.exists(tra_db_dir):
         os.makedirs(tra_db_dir)
     if not os.path.exists(seq_db):
-        download_and_extract(f'https://github.com/DEpt-metagenom/TraDb/raw/main/tra_db/Tra_db_sequences_{seq_type}.fa.gz', tra_db_dir, f'{seqs}.gz', arch_type='gz')
+        download_and_extract(f'https://zenodo.org/records/15539975/files/Tra_db_sequences_{seq_type}.fa.gz', tra_db_dir, f'{seqs}.gz', arch_type='gz')
         if seq_type == 'dna':
             create_mmseqs_db_cmd = f'mmseqs createdb {seqs} {seq_db} && mmseqs createindex --search-type 3 {seq_db} {tra_db_dir}/tmp'
         else:
             create_mmseqs_db_cmd = f'mmseqs createdb {seqs} {seq_db} && mmseqs createindex {seq_db} {tra_db_dir}/tmp'
         run_shell_cmd(create_mmseqs_db_cmd)
-        download_and_extract(f'https://github.com/DEpt-metagenom/TraDb/raw/main/tra_db/Tra_db_taxa_positons_{seq_type}.db', tra_db_dir, metadata, arch_type=None)
+        download_and_extract(f'https://zenodo.org/records/15539975/files/Tra_db_taxa_positons_{seq_type}.db', tra_db_dir, metadata, arch_type=None)
 
     if seq_type == 'dna':
         mmseqs_cmd = f'mmseqs easy-search --search-type 3 --threads {num_proc} --format-mode 4 --format-output "target,query,pident,nident,qcov,evalue,gapopen,tlen,qlen,bits" --cov-mode 2 -c 0.8 --min-seq-id 0.8 -e 1e-50 {orf_fasta} {seq_db} {raw_hits} tmp 1> {outdir}/{basename}_{seq_type}_mmseqs.log'
@@ -430,7 +430,7 @@ def download_all_databases(tra_db_dir, platon_db_dir):
 
     # Download TraDb DNA database
     download_and_extract(
-        'https://github.com/DEpt-metagenom/TraDb/raw/main/tra_db/Tra_db_sequences_dna.fa.gz',
+        'https://zenodo.org/records/15539975/files/Tra_db_sequences_dna.fa.gz',
         tra_db_dir,
         f'{tra_db_dir}/Tra_db_sequences_dna.fa.gz',
         arch_type='gz'
@@ -438,7 +438,7 @@ def download_all_databases(tra_db_dir, platon_db_dir):
 
     # Download TraDb AA database
     download_and_extract(
-        'https://github.com/DEpt-metagenom/TraDb/raw/main/tra_db/Tra_db_sequences_aa.fa.gz',
+        'https://zenodo.org/records/15539975/files/Tra_db_sequences_aa.fa.gz',
         tra_db_dir,
         f'{tra_db_dir}/Tra_db_sequences_aa.fa.gz',
         arch_type='gz'
@@ -446,7 +446,7 @@ def download_all_databases(tra_db_dir, platon_db_dir):
 
     # Download TraDb metadata for DNA
     download_and_extract(
-        'https://github.com/DEpt-metagenom/TraDb/raw/main/tra_db/Tra_db_taxa_positons_dna.db',
+        'https://zenodo.org/records/15539975/files/Tra_db_taxa_positons_dna.db',
         tra_db_dir,
         f'{tra_db_dir}/Tra_db_taxa_positons_dna.db',
         arch_type=None
@@ -454,7 +454,7 @@ def download_all_databases(tra_db_dir, platon_db_dir):
 
     # Download TraDb metadata for AA
     download_and_extract(
-        'https://github.com/DEpt-metagenom/TraDb/raw/main/tra_db/Tra_db_taxa_positons_aa.db',
+        'https://zenodo.org/records/15539975/files/Tra_db_taxa_positons_aa.db',
         tra_db_dir,
         f'{tra_db_dir}/Tra_db_taxa_positons_aa.db',
         arch_type=None
