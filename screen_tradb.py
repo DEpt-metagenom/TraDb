@@ -7,7 +7,7 @@ import re
 import sqlite3
 import subprocess
 
-version_number = "screen_tradb version 0.2"
+version_number = "screen_tradb version 0.2.5"
 home_dir = os.path.expanduser('~')
 
 
@@ -495,7 +495,7 @@ def main():
            ___  ___ _ __ ___  ___ _ __   |_   _| __ __ _|  _ \| |__
           / __|/ __| '__/ _ \/ _ \ '_ \    | || '__/ _` | | | | '_ \\
           \__ \ (__| | |  __/  __/ | | |   | || | | (_| | |_| | |_) |
-          |___/\___|_|  \___|\___|_| |_|   |_||_|  \__,_|____/|_.__/ v0.2
+          |___/\___|_|  \___|\___|_| |_|   |_||_|  \__,_|____/|_.__/ v0.2.5
     """)
 
     parser = argparse.ArgumentParser(description="Screening of conjugation transfer genes in plasmid sequences.")
