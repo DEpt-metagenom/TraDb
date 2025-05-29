@@ -1,0 +1,38 @@
+Bootstrap: docker
+From: debian:bullseye-slim
+
+%environment
+    export TZ=UTC
+    export PATH=/app/miniconda/bin:$PATH
+
+%post
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update && apt-get install -y wget bash
+
+    # Set working directory
+    mkdir -p /app
+    cd /app
+
+    # Install Miniconda
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh
+    bash /tmp/miniconda.sh -b -p /app/miniconda
+    rm /tmp/miniconda.sh
+
+    # Configure Conda
+    /app/miniconda/bin/conda init
+    /app/miniconda/bin/conda config --add channels bioconda
+    /app/miniconda/bin/conda config --add channels conda-forge
+
+    # Install packages from explicit file
+    /app/miniconda/bin/conda install --file /app/conda_env_explicit.txt
+
+    # Install script
+    chmod +x /usr/local/bin/screen_tradb.py
+    ln -s /usr/local/bin/screen_tradb.py /usr/local/bin/screen_tradb
+
+%files
+    conda_env_explicit.txt /app/conda_env_explicit.txt
+    screen_tradb.py /usr/local/bin/screen_tradb.py
+
+%runscript
+    exec screen_tradb.py -h 
