@@ -217,14 +217,14 @@ optional arguments:
 ## Output
 The output of `screen_tradb.py` contains the sequences of the transfer genes, the genomic coordinates of the transfer genes and the metadata of the reference sequences (species, position of the gene in the original plasmid). The output files (if plasmids were used as input) are the following:
 
-- `_dna.fa`, `_aa.fa`: Predicted ORFs in DNA and AA format.
-- `_dna_raw_hits.tsv`, `_aa_raw_hits.tsv`: The results of mmseqs2 in tabular format using DNA and AA as input without any filters applied.
-- `_dna_filtered_hits.tsv`, `_aa_filtered_hits.tsv`: The coordinates of the transfer genes with their identity and coverage values. The ID of the hits (Cluster column) indicates the gene and the similarity cluster identified when building the reference database, e.g. TraA-Cluster10 means that TraA was found and the gene belongs to similarity cluster 10. The cluster IDs are not meaningful on their own, but are used to retrieve the metadata of the hits. The query ID displays the ID of the sequence and the genomic coordinates of the gene in the following format: `contig_ID:start-end`.
-- `_dna_hit_sequences.fa`, `_aa_hit_sequences.fa`: The sequence of the identified transfer genes in DNA and AA format.
-- `_dna_hit_data.tsv`, `_aa_hit_data.tsv`: The metadata of the identified transfer genes. The filtered list of hits is supplemented by the list of taxa and the position of the transfer genes in the original plasmid sequence.
-- `_dna_mmseqs.log`, `_aa_mmseqs.log`: MMSeqs2 log of the similarity search using DNA and AA.
-- `.bed`: Coordinates of the ORFs in the input sequence.
-- `.gff`: The output of Prodigal (used to identify ORFs) in gff format.
+- `<basename>_dna.fa`, `<basename>_aa.fa`: Predicted ORFs in DNA and AA format.
+- `<basename>_dna_raw_hits.tsv`, `<basename>_aa_raw_hits.tsv`: The results of mmseqs2 in tabular format using DNA and AA as input without any filters applied.
+- `<basename>_dna_filtered_hits.tsv`, `<basename>_aa_filtered_hits.tsv`: The coordinates of the transfer genes with their identity and coverage values. The ID of the hits (Cluster column) indicates the gene and the similarity cluster identified when building the reference database, e.g. TraA-Cluster10 means that TraA was found and the gene belongs to similarity cluster 10. The cluster IDs are not meaningful on their own, but are used to retrieve the metadata of the hits. The query ID displays the ID of the sequence and the genomic coordinates of the gene in the following format: `contig_ID:start-end`.
+- `<basename>_dna_hit_sequences.fa`, `<basename>_aa_hit_sequences.fa`: The sequence of the identified transfer genes in DNA and AA format.
+- `<basename>_dna_hit_data.tsv`, `<basename>_aa_hit_data.tsv`: The metadata of the identified transfer genes. The filtered list of hits is supplemented by the list of taxa and the position of the transfer genes in the original plasmid sequence.
+- `<basename>_dna_mmseqs.log`, `<basename>_aa_mmseqs.log`: MMSeqs2 log of the similarity search using DNA and AA.
+- `<basename>.bed`: Coordinates of the ORFs in the input sequence.
+- `<basename>.gff`: The output of Prodigal (used to identify ORFs) in gff format.
 
 ## Citation
 
