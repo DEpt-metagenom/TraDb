@@ -30,6 +30,8 @@ Or
 conda create -n tradb --file conda_env_explicit.txt
 ```
 
+After the environment has been created, `screen_tradb.py` can be run after the environment has been activated by executing `conda activate tradb`.
+
 If you prefer to install dependencies in the currently active environment you should run:
 ```
 conda install --file conda_env_explicit.txt
