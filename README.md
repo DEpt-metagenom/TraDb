@@ -76,8 +76,8 @@ Assuming the reference database (`tra_db`) and the plasmid to be analysed are in
 download_all_db.py ./ 
 
 # starts screen_tradb.py using Docker
-# input.fasta is a plasmid sequence in the current working directory
-docker run -i -v $(pwd):/data/ -t deptmetagenom/tra_db:0.2.5 screen_tradb.py --transfer_gene_db_dir /data/tra_db/ /data/input.fasta
+# <input>.fasta is a plasmid sequence in the current working directory
+docker run -i -v $(pwd):/data/ -t deptmetagenom/tra_db:0.2.5 screen_tradb.py --transfer_gene_db_dir /data/tra_db/ /data/<input>.fasta
 ```
 
 The Docker container can also be built locally by running `sudo docker build -t tra_db .`, provided that the Dockerfile is located in the current directory.
@@ -85,7 +85,7 @@ The Docker container can also be built locally by running `sudo docker build -t 
 If you are using an HPC system or Docker is not available for you, Apptainer might be more practical to run the container. By default, Apptainer uses automount and should find the database in its default location (or at the specified path). `screen_tradb.py` can be started with Apptainer in the following way:
 
 ```
-apptainer exec docker://deptmetagenom/tra_db:0.2.5 screen_tradb.py input.fasta
+apptainer exec docker://deptmetagenom/tra_db:0.2.5 screen_tradb.py <input>.fasta
 ```
 
 The above command pulls the image from DockerHub. If you want to save a local copy of the container as a portable `sif` file, you can execute this command:
@@ -120,7 +120,7 @@ The script can be executed in three modes.
 
 This is the default mode for running `screen_tradb.py`, which does not require any options other than the defaults. In this mode it is assumed that the input plasmid sequences are in fasta format. The script predicts ORFs, which are matched against the reference database in DNA and AA format by default. The metadata (species, position of the genes in the reference genome) is then queried from an sqlite3 database. The default identity and coverage of the reference sequence queries is 80 %. The output is stored in `tra_out/`. This type of analysis (using one thread by default) can be started as follows:
 
-`screen_tradb.py input.fasta`.
+`screen_tradb.py <input>.fasta`.
 
 ### Whole genome sequences
 
