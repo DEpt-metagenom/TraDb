@@ -1,8 +1,14 @@
-# TraDb
+# TraDb - Introduction
 
 TraDb is a database and toolset for the identification and annotation of plasmid transfer genes in bacterial genome sequences. It supports whole genome sequences, plasmids and ORFs as input. TraDb allows searching and analysing sequences to predict genes involved in horizontal gene transfer and to track conjugative plasmids.
 
-## Installation
+## System Requirements
+
+- At least 10 GB of RAM is recommended for testing and processing typical datasets.
+- Python 3.7 or higher.
+- Supported OS: Linux (recommended), macOS or WSL2.
+  
+## Prerequisites
 
 The main script for searching for plasmid transfer genes is `screen_tradb.py`. The hard dependencies are the following:
 - `prodigal 2.6.3`
@@ -11,11 +17,35 @@ The main script for searching for plasmid transfer genes is `screen_tradb.py`. T
 - `wget`
 - `mmseqs2 15.6f452`. 
 
+## Installation
+
+### Quickstart
+
+1. Clone the repository and enter the directory:
+
 To install TraDb and its dependencies, clone this repository using git and navigate to the TraDb directory:
 ```
 git clone https://github.com/DEpt-metagenom/TraDb.git
 cd TraDb
 ```
+
+2. Create and activate the environment:
+```
+conda env create --file conda_env.yml
+conda activate tradb
+```
+
+3. Download the required databases:
+```
+python download_all_db.py
+```
+4. Test the installation (requires ~10 GB RAM):
+```
+python test.py
+```
+5. Run a sample analysis:
+   
+`python screen_tradb.py <input>.fasta`.
 
 ### Conda
 
@@ -47,14 +77,14 @@ Optionally, the export can be made permanent by adding the above line to your `.
 ### Databases
 
 The tool relies on multiple databases:
-1. [transfer gene database] (https://zenodo.org/records/15539975), which contains DNA and AA reference sequences with metadata and was developed specifically for this tool.
+1. [transfer gene database](https://zenodo.org/records/15539975), which contains DNA and AA reference sequences with metadata and was developed specifically for this tool.
 
 2. The [platon database](https://zenodo.org/records/4066768) for the identification of plasmids in whole genome sequences.
 
 On the first run, screen_tradb.py attempts to download all required databases for the run. Alternatively, you can also run:
 
 ```
-screen_tradb.py --download-database
+python screen_tradb.py --download-database
 ```
 
 By default, the databases are saved in $HOME/tra_db. This can be changed using `--transfer_gene_db_dir` and `--platon_db_dir`, which affects both the download of the data and the location where `screen_tradb.py` looks for the reference.
@@ -62,8 +92,9 @@ By default, the databases are saved in $HOME/tra_db. This can be changed using `
 You can also download the required databases with `download_all_db.py`. By default, it stores the downloaded files in `$HOME/tra_db/{trad_db,platon}`. The location of the downloaded files can be specified as a positional argument, e.g. `download_all_db.py path/to/my_local_copy_of_tra_db`.
 
 ### Test
+The installation can be tested by running: `python test.py`˛The test script takes three plasmid sequences from the `test` directory (`AP000342.1.fasta`, `AP001918.1.fasta`, `BN000925.1.fasta`) and executes `screen_tradb.py` for all of them. Then it compares the results with the expected output files in `test/test_out/`. If the results match, the script should report: "`Test successful: All outputs match the expected results`". In case of differences, the test fails and the dependencies should be double checked. The test script reports differences and `screen_tradb.py` reports missing dependencies. If the test script reports "`Test failed: Differences found.`", please check the test log carefully.
 
-The installation can be tested by `./test.py`˛The test script takes three plasmid sequences from the `test` directory (`AP000342.1.fasta`, `AP001918.1.fasta`, `BN000925.1.fasta`) and executes `screen_tradb.py` for all of them. Then it compares the results with the expected output files in `test/test_out/`. If the results match, the script should report: "`Test successful: All outputs match the expected results`". In case of differences, the test fails and the dependencies should be double checked. The test script reports differences and `screen_tradb.py` reports missing dependencies. If the test script reports "`Test failed: Differences found.`", please check the test log carefully.
+Note: At least 10 GB of RAM is recommended to successfully run the test.
 
 ### Containers
 
@@ -73,7 +104,7 @@ Assuming the reference database (`tra_db`) and the plasmid to be analysed are in
 
 ```
 # downloads databases to the current working directory, run only once
-download_all_db.py ./ 
+python download_all_db.py ./ 
 
 # starts screen_tradb.py using Docker
 # <input>.fasta is a plasmid sequence in the current working directory
@@ -120,19 +151,19 @@ The script can be executed in three modes.
 
 This is the default mode for running `screen_tradb.py`, which does not require any options other than the defaults. In this mode it is assumed that the input plasmid sequences are in fasta format. The script predicts ORFs, which are matched against the reference database in DNA and AA format by default. The metadata (species, position of the genes in the reference genome) is then queried from an sqlite3 database. The default identity and coverage of the reference sequence queries is 80 %. The output is stored in `tra_out/`. This type of analysis (using one thread by default) can be started as follows:
 
-`screen_tradb.py <input>.fasta`.
+`python screen_tradb.py <input>.fasta`.
 
 ### Whole genome sequences
 
 If whole genomes are used as input, `screen_tradb.py` identifies the plasmid contigs with `platon` before predicting ORFs and searching for transfer genes. The platon database is only required if you use this feature. This feature can be activated using the option `--plasmid_prediction`, e.g:
 
-`screen_tradb.py --plasmid_prediction whole_genome_with_chromosome_and_plasmid.fasta`.
+`python screen_tradb.py --plasmid_prediction whole_genome_with_chromosome_and_plasmid.fasta`.
 
 ### ORFs
 
 If you have already predicted the ORFs of the contigs of interest, you can provide the ORF sequences directly to `screen_tradb.py`. The feature can be switched on using the `--reading_frames` option. In this way, only the similarity search of ORFs and the query of metadata is performed. ORFs can be specified as either DNA or AA and `--type` should be selected accordingly. The option `--type auto` is only valid in this mode and will attempt to determine whether the input is DNA or AA. The identification of transfer genes in predicted ORFs can be performed as follows:
 
-`screen_tradb.py --reading_frames --type {dna,aa,auto} ORFs.fasta`.
+`python screen_tradb.py --reading_frames --type {dna,aa,auto} ORFs.fasta`.
 
 ## Options
 If you need to change the output directory, the number of threads, the minimum query identity and coverage, or the type of search, please refer to the list of options to find the appropriate option, which can be found in the help menu (by running `screen_tradb.py -h`):
@@ -227,6 +258,12 @@ The output of `screen_tradb.py` contains the sequences of the transfer genes, th
 - `<basename>_dna_mmseqs.log`, `<basename>_aa_mmseqs.log`: MMSeqs2 log of the similarity search using DNA and AA.
 - `<basename>.bed`: Coordinates of the ORFs in the input sequence.
 - `<basename>.gff`: The output of Prodigal (used to identify ORFs) in gff format.
+
+## License
+
+This project is licensed under the GNU License.
+
+You are free to use, modify, and distribute this software in accordance with the terms of the license. See the [LICENSE](https://github.com/DEpt-metagenom/TraDb/blob/main/LICENSE) file for details.
 
 ## Citation
 
