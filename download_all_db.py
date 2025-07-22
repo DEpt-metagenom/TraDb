@@ -6,7 +6,7 @@ import sys
 
 home_dir = os.path.expanduser('~')
 
-output_dir = sys.argv[1] if len(sys.argv) > 1 else 'home_dir'
+output_dir = sys.argv[1] if len(sys.argv) > 1 else home_dir
 
 os.makedirs(output_dir, exist_ok=True)
 
